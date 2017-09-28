@@ -1,0 +1,104 @@
+@import "bootstrap.min.css";
+@import "font-awesome.min.css";
+@import url('https://fonts.googleapis.com/css?family=Raleway');
+
+
+
+.imgback {
+	background-image: url("../img/tableau.jpg");
+	background-size: cover;
+	background-repeat: no-repeat;
+	padding-bottom: 20%;
+}
+
+.connect {
+	padding-top: 1%;
+}
+
+/****************** Début de la NAVBAR ******************/ 
+
+
+.hambouton { /* classe pour caché pour empêcher l'apparition du menu hamburger pour le responsive (modification plus tard dans les medias) */
+	display: none;
+}
+
+.menu { /* div sur laquelle le nouveau menu est mis en place et donc caché mais également modifié plus tard dans les medias */
+	display: none;
+}
+
+.barnav{ /* border à gauche sur le texte de la navbar, couleur du texte et ajustement, curseur selon le contexte */
+	border-left: solid 1px #464950;
+    color: #ffffff;
+    font-weight: bold;
+	cursor: context-menu;
+}
+.adjust{ /* le sous menu de formations flotte constament par dessus tous les éléments */
+	z-index: 4
+}
+/* hover sur chaque texte de la navbar */
+.red:hover{ 
+	color:#e32213 !important;
+}
+.magenta:hover{
+	color:#e5007e !important;
+}
+
+.blue:hover{
+	color:#009ee2 !important;
+}
+
+.yellow:hover{
+	color:#fab900 !important;
+}
+
+#topnav{	/* Couleur, placement, alignement, customisation de la topnav (barre noire) */
+	background-color: black;
+	border-radius: 15px;
+	margin-top: 2%;
+	text-align: center;
+	padding-top: 2%;
+	padding-bottom: 4%;	
+}
+#topnav li{ /* mode de rendu que les li doivent adopter */
+	display: inline-block;
+
+	 
+}
+#topnav a{     /* mise en forme du texte "accueil" */
+    font-weight: bold;
+}
+
+#menuScroll{ /* on cache le sous-menu de formations à l'affichage de la page */
+	display: none; 
+	position: absolute; 
+}
+
+#topnav .barnav:hover ul{ /* on affiche le sous-menu au survol de la souris sur "formations" */
+	display: block; 
+}
+
+#menuScroll li{ /* disposition des éléments du sous-menu */
+	display: block;  
+}
+
+#menuScroll li a:link{ /* une petite barre de couleur apparait à gauche de chaque élément du sous-menu  + modification de la classe bootstrap pour supprimer des borders*/
+	padding: 4%; 
+	margin: 0; 
+	border-left: 5px solid #e2007b; 
+	color: black;
+	border-top-style: none !important;
+    border-right-style: none !important;
+    border-bottom-style: none !important;
+}
+
+#menuScroll li a:hover{ /* et elle change de couleur au survol sur l'élément */
+	display: block; 
+	border-left: 5px solid #f4c000; 
+	color: #009de0;
+}
+
+.whenconnected{ /* modification sur la partie droite "profil + déconnexion" */
+	display: inline;
+    padding-top: 7%;    
+    font-size: 10px;
+}
