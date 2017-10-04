@@ -37,7 +37,7 @@
 			
 			$pseudo = $login; 	// On récupère le pseudo entré dans une variable.
 			$mdp = htmlspecialchars($password,ENT_QUOTES);	// On récupère le mot de passe entré dans une variable. Utilisation de la fonction htmlspecialchars, qui convertit tous les guillemets simples en doubles et inversemement (c'est le mode ENT_QUOTES). Ainsi l'utilisateur ne peut pas utiliser de guillements dans le champs mot de passe et ne peut donc pas se connecter frauduleusement.
-			$sql = "SELECT * FROM users WHERE mail = '$login'"; // Requête que l'on va envoyer à la base de donnée.
+			$sql = "SELECT * FROM users WHERE mail = '$login' AND active='1'"; // Requête que l'on va envoyer à la base de donnée.
 			//$result = mysqli_query($this->conn, $sql); //Envoi de la requête qu'on stock dans la variable result
 			//$resultarr = mysqli_fetch_array($result); //On converti le résultat de "result" sous forme de tableau pour faciliter la récolte d'information.
 			$contenu = Connexion::getInstance()->prepare($sql); //on stock dans une variable, on appel la class connexion et sa fonction getInstance, query lance l'intérogation de la BDD ($sql) 
@@ -148,8 +148,10 @@
 						$sql = "INSERT INTO `users`(`idusers`, `name`, `firstname`, `adress`, `zipcode`, `city`, `phone`, `mail`, `password`,`token`,`timestamp`) VALUES ('','$name','$firstname','$adress','$zipcode','$city','$phone','$mail','$passfinal','','')";
 						$contenu = Connexion::getInstance()->query($sql); 
 						echo ("ce pseudo existe déjà");
-						$retour["message"] = "Compte créé";
-		        		$retour["return"] = "location:../index.php";
+						$this->newtoken2($mail,$name);
+						$retour["message"] = "Un lien de confirmation a été envoyé dans votre boîte de réception.";
+						$retour["return"] = "location:../index.php";
+
 
 					}else { // sinon on compte a partir de l'id maximum
 						$sql2 = "ALTER TABLE users AUTO_INCREMENT = ".$max.""; 
@@ -157,15 +159,20 @@
 						$contenu->execute();
 						$sql = "INSERT INTO `users`(`idusers`, `name`, `firstname`, `adress`, `zipcode`, `city`, `phone`, `mail`, `password`,`token`,`timestamp`) VALUES ('','$name','$firstname','$adress','$zipcode','$city','$phone','$mail','$passfinal','','')";
 						$contenu = Connexion::getInstance()->query($sql); 
-						$retour["message"] = "Votre compte a été créé";
-		        		$retour["return"] = "location:../index.php";
+						$this->newtoken2($mail,$name);
+						$retour["message"] = "Un lien de confirmation a été envoyé dans votre boîte de réception.";
+						$retour["return"] = "location:../index.php";
+
 					}
 				}
 				else { //sinon il y a effectivement un vide, alors on isert dans l'emplacement de l'id vide
 						$sql = "INSERT INTO `users`(`idusers`, `name`, `firstname`, `adress`, `zipcode`, `city`, `phone`, `mail`, `password`,`token`,`timestamp`) VALUES (".$idtrouve.",'$name','$firstname','$adress','$zipcode','$city','$phone','$mail','$passfinal','','')";
 						$contenu = Connexion::getInstance()->query($sql); 
-						$retour["message"] = "Votre compte a été créé";
-		        		$retour["return"] = "location:../index.php";
+						$this->newtoken2($mail,$name);
+						$retour["message"] = "Un lien de confirmation a été envoyé dans votre boîte de réception.";
+						$retour["return"] = "location:../index.php";
+						
+
 				}
 				 // Insertion dans la bdd
 		      
@@ -748,6 +755,69 @@
 
 		}
 		
+		public function newtoken2($mail, $name){
+
+			
+			$token=$this->chaine_aleatoire(10);
+			$token=$this->cryptstamp($token);//on réutilise le cryptage du timestamp puisqu'il ne contient
+			//pas de caractère spéciaux et que sa longueur est sécurisante.
+			//$token = $token.'$'.date("Y-m-d");
+			$timestamp = date_create(); //On créer une date (d'aujourd'hui) que l'on stock dans la variable timestamp.
+			$timestamp = date_timestamp_get($timestamp); 
+			/*
+				Envoyer le timestamp dans la colonne sans cryptage
+			*/
+			$cryptstamp = $this->cryptstamp($timestamp);
+			//echo ($timestamp).'<br>';
+			//echo ($cryptstamp);
+			//die();
+			$sql = "UPDATE users SET token='$token', timestamp='$timestamp' WHERE mail = '$mail'";
+			$contenu = Connexion::getInstance()->prepare($sql); //on stock dans une variable, on appel la class connexion et sa fonction getInstance, query lance l'intérogation de la BDD ($sql) 
+			$contenu->execute();
+			$lien = 'http://jean-patrick-enchere.alwaysdata.net/enchereamateur/confirm.php?m='.$token.'&j='.$cryptstamp.'';
+			$mailto = $this->sendMailRegister($name,$mail,$lien);
+				
+
+		}
+		
+		public function veriftoken2($token,$timestamp){
+			$verif = "SELECT * FROM users WHERE token = '$token' AND active='0'";
+			$contenu = Connexion::getInstance()->prepare($verif);
+			$contenu->execute();
+			$com = $contenu->fetchall();
+			$compte=count($com);
+			
+			if ($compte > 0) {
+				$contenu->execute();
+				$rows = $contenu->fetch();
+				$verifstamp = $rows['timestamp'];
+				$verifcryptstamp = $this->cryptstamp($verifstamp);
+				if($verifcryptstamp == $timestamp){
+					$nowstamp = date_create();
+					$nowstamp = date_timestamp_get($nowstamp);
+					$diff = $nowstamp - $verifstamp;
+					if($diff > 604800) {
+						$sql = "DELETE FROM users WHERE token = '$token' AND timestamp = '$timestamp' AND active='0'"; 
+						$contenu = Connexion::getInstance()->prepare($sql);
+						$contenu->execute();
+						header ('location:./index.php?message=Délai expiré');
+					}else{
+						$sql = "UPDATE users SET active='1', token='', timestamp='' WHERE token = '$token'";
+						$contenu = Connexion::getInstance()->prepare($sql);
+						$contenu->execute();
+						header ('location:./index.php?message=Compte activé');
+					}
+				}else{
+					header ('location:./index.php?message=Délai expiré');
+				}	
+			}else{
+				header ('location:./index.php?message=Lien non valide');
+			}
+			return $retour;
+		}
+		
+		
+
 		public function newtoken($recup){
 			$verif = "SELECT 'mail' FROM users WHERE mail = '$recup'";
 			$contenu = Connexion::getInstance()->prepare($verif);
@@ -774,7 +844,7 @@
 				$sql = "UPDATE users SET token='$token', timestamp='$timestamp' WHERE mail = '$recup'";
 				$contenu = Connexion::getInstance()->prepare($sql); //on stock dans une variable, on appel la class connexion et sa fonction getInstance, query lance l'intérogation de la BDD ($sql) 
 				$contenu->execute();
-				$lien = 'http://jean-patrick-enchere.alwaysdata.net/enchereamateur/lostmdp.php?token='.$token.'&timestamp='.$cryptstamp.'';
+				$lien = 'http://jean-patrick-enchere.alwaysdata.net/enchereamateur/lostmdp.php?m='.$token.'&j='.$cryptstamp.'';
 				$mailto = $this->sendMailRecup($recup,$lien);
 				$retour["message"] = "Un lien de réinitialisation a été envoyé dans votre boîte de réception.";
 		        $retour["return"] = "location:../recupmail.php";
@@ -805,7 +875,7 @@
 					$nowstamp = date_timestamp_get($nowstamp);
 					$diff = $nowstamp - $verifstamp;
 					if($diff > 86400) {
-						$sql = "UPDATE users SET token='' WHERE token = '$token'"; 
+						$sql = "UPDATE users SET token='', timestamp='' WHERE token = '$token'"; 
 						$contenu = Connexion::getInstance()->prepare($sql);
 						$contenu->execute();
 						header ('location:./index.php?message=Délai expiré');
@@ -828,7 +898,7 @@
 				$contenu = Connexion::getInstance()->prepare($sql);
 				$contenu->execute();
 				
-				$sql2= "UPDATE users SET token='' WHERE token = '$token'"; 
+				$sql2= "UPDATE users SET token='', timestamp='' WHERE token = '$token'"; 
 				$contenu = Connexion::getInstance()->prepare($sql2);
 				$contenu->execute();
 				header ('location:./index.php?message=Votre mot de passe a été modifié');
@@ -859,34 +929,55 @@
 
 		}
 		
+		public function contactmail($name,$firstname,$mail,$phone,$msg){
+			
+			$destinataire = 'manfrenc2@gmail.com,chahbouni@hotmail.com'; // mais qui va recevoir le mail de "contact"
+			// Pour les champs $expediteur / $copie / $destinataire, séparer par une virgule s'il y a plusieurs adresses
+			$expediteur = 'jean-patrick-enchere@alwaysdata.net'; // adresse mail du site
+			//$copie = 'adresse@fai.com'; //Si besoin d'une deuxiemme adresse
+			//$copie_cachee = 'adresse@fai.com';
+			$objet = 'Commentaire de '.'   ' . ' ' .$name. ' ' .$firstname; // Objet du message
+			$headers  = 'MIME-Version: 1.0' . "\n"; // Version MIME
+			$headers .= 'Reply-To: '.$mail."\n"; // Mail de reponse
+			$headers .= 'From: "'.$name.' '.$firstname.'"<'.$mail.'>'."\n"; // Expediteur
+			$headers .= 'Delivered-to: '.$destinataire."\n"; // Destinataire     
+			$message = 'Bonjour'."\n\n"; //Debut du message. Les "\n\n" servent à revenir à la ligne.
+			$message .= 'Vous avez reçu ce message de la part de :'.' '.$name.' '.$firstname."\n\n";
+			$message .= 'Message recu:'."\n\n".$msg."\n\n";
+			$message .= 'Le joindre par téléphone:'.' '.$phone;
+			
+			if (mail($destinataire, $objet, $message, $headers)) // si il y a envoi du message
+			{
+				header ('location:./index.php?message=Votre message a été envoyé');
+			}
+		}
+		
 
 
 
 		/************************************ Function private ************************************************/
 
 		
-		private function sendMailRegister($name, $firstname, $destinataire, $passrand, $formation, $fordate){    // On définie une fonction ayant pour rôle de faire un mail suite à l'inscription. 
+		private function sendMailRegister($name, $mail, $lien){    // On définie une fonction ayant pour rôle de faire un mail suite à l'inscription. 
 				//$destinataire = 'manfrenc2@gmail.com'; // pour test, a enlever en prod.
 				// Pour les champs $expediteur / $copie / $destinataire, séparer par une virgule s'il y a plusieurs adresses
-				$expediteur = 'support@fscf-yonne.fr';
+				$destinataire = $mail;
+				$expediteur = 'jean-patrick-enchere@alwaysdata.net';
 				//$copie = 'adresse@fai.com';
 				//$copie_cachee = 'adresse@fai.com';
-				$objet = 'Mot de passe fscf de '. ' ' . ' ' .$name. ' ' .$firstname; // Objet du message
+				$objet = 'Confirmation de votre inscription'; // Objet du message
 				$headers  = 'MIME-Version: 1.0' . "\n"; // Version MIME
 				$headers .= 'Reply-To: '.$expediteur."\n"; // Mail de reponse
 				$headers .= 'From: <'.$expediteur.'>'."\n"; // Expediteur
 				$headers .= 'Delivered-to: '.$destinataire."\n"; // Destinataire
 				// $headers .= 'Cc: '.$copie."\n"; // Copie Cc
 				// $headers .= 'Bcc: '.$copie_cachee."\n\n"; // Copie cachée Bcc        
-			    $message = 'Merci' .' '.' '. $name.' '.$firstname ."\n\n";
-			    $message .= 'Votre enregistrement sur le site a bien été pris en compte.' ."\n\n";
-				$message .= 'Retrouvez ici votre mot de passe, que vous pourrez changer, pour vous connecter en vous servant de votre adresse mail:'."\n\n";
-				$message .= 'Email :'.$destinataire."\n\n";
-				$message .= 'Mot de passe :'.$passrand ."\n\n";	  
-				$message .= 'Choix de la formation :' .$formation ."\n\n";
-				$message .= 'Date de la formation :' .$fordate ."\n\n";
+			    $message = 'Bonjour M.'.$name ."\n\n";
+			    $message .= 'Merci de votre inscription sur notre site.' ."\n\n";
+				$message .= "Afin d'activer votre compte, merci de cliquer sur le lien suivant :"."\n\n";
+				$message .= $lien."\n\n";
 				$message .= 'Ce message est une notification automatique. Merci de ne pas y répondre (votre message ne sera pas traité).'."\n\n";
-				$message .= 'Cordialement, l\'équipe FSCF de l\'Yonne';
+				$message .= 'Cordialement, l\'équipe enchereamateur';
 		  
 		    if (mail($destinataire, $objet, $message, $headers)){
 		    	return true;

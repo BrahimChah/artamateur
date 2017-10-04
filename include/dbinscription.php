@@ -17,7 +17,6 @@ if (isset($_POST["submit"]) && $_POST["termUse"] == true) { //On vérifie que l'
     $mdp = strip_tags($_POST["mdp"]); 
 	  $retour = $bdd->insertUser($name,$firstname,$adress,$zipcode,$city,$phone,$mail, $mdp);
     header ($retour['return'].'?message='.$retour['message']); //Résultat de la fonction insertuser : si tout ok -> index.php, sinon on reste sur inscription.php (voir fonction insertuser dans dbconfig.php)
-    
-    
+        
 }
 ?>

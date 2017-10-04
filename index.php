@@ -13,20 +13,20 @@
 <script src="js/scriptindex.js" type="text/javascript"></script>
 <script src="js/scripttoutvoircountdown.js" type="text/javascript"></script>
 
-			<div class="col-md-12 col-xs-12">
-				<div class="container2">
-				  <div class="carousel">
+<div class="col-md-12 col-xs-12">
+	<div class="container2">
+	  <div class="carousel">
 
-					<?php 
-					ini_set("display_errors",0);error_reporting(0);
-					$bdd->seecarou(); ?>
-				  </div>
-				</div>
-			</div>
-			<div class="col-md-12 col-xs-12 tuiles">
-				<?php $bdd->seeexpo(); ?>
-			</div>
-				
+		<?php 
+		ini_set("display_errors",0);error_reporting(0);
+		$bdd->seecarou(); ?>
+	  </div>
+	</div>
+</div>
+<div class="col-md-12 col-xs-12 tuiles">
+	<?php $bdd->seeexpo(); ?>
+</div>
+	
 				
 			
 

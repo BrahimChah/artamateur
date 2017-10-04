@@ -1,4 +1,6 @@
-<?php require('include/header.php'); ?>	
+<?php 
+	require('include/header.php');
+?>	
 	<div class="container">					
 		<section> <!-- Début du contenu principal -->       
 			<h1 class="title"> NOUS<br>CONTACTER </h1>

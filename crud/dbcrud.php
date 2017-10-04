@@ -18,6 +18,43 @@
             return $this->conn; // on retourne la variable $conn une fois que la fonction est executée.
         }*/
 
+		public function verifadmin($id) {
+
+			$sql = "SELECT * from users WHERE mail='$id'";
+			$contenu = Connexion::getInstance()->prepare($sql);
+		 	$contenu->execute();
+		 	$result = $contenu->fetch();
+		 	$admin = $result['admin'];
+		 	if ($admin == 0){
+		 		header('location: ../index.php');
+		 	}
+
+		}
+
+
+		public function clearnoactif() {
+		 	$verif = "SELECT * FROM users WHERE active='0'";
+		 	$contenu = Connexion::getInstance()->prepare($verif);
+		 	$contenu->execute();
+			$result = $contenu->fetchall();
+			foreach($result as $rows) {
+				
+				$idusers = $rows['idusers'];
+				$verifstamp = $rows['timestamp'];
+				$nowstamp = date_create();
+				$nowstamp = date_timestamp_get($nowstamp);
+				$diff = $nowstamp - $verifstamp;
+				
+				if($diff > 604800) {
+					$sql = "DELETE FROM users WHERE idusers='$idusers' AND active='0'"; 
+					$contenu = Connexion::getInstance()->prepare($sql);
+					$contenu->execute();
+				}
+			}
+		}
+	
+		
+		
         public function update(){ // fonction de mise à jour table stagiaire
             
 

@@ -9,13 +9,13 @@
 					<i class="fa fa-google-plus-official"></i>
 					<i class="fa fa-instagram"></i>-->
 				</div>
-				&copy Copyright FSCF 2017<!-- copyright -->
+				&copy Copyright '' 2017<!-- copyright -->
 			</div>
 			<div class="col-md-4 col-xs-4 adresse2"><!-- coordonnées physiques, téléphonique et email -->
 				<p>
-				FSCF - 16 boulevard de la Marne. BP 11. 89000 Auxerre<br>
-				Tel : 03.86.72.11.27<br>
-				Email : <a href="mailto:fscf.yonne@sfr.fr">fscf.yonne@sfr.fr</a>
+				bla bla bla bla<br>
+				Tel : bla bla bla<br>
+				Email : <a href="mailto:blabla@blablo.fr">blabla@blablo.fr</a>
 				</p>
 			</div>
 			<div class="col-md-4 col-xs-4 legal"> <!-- Lien pour accéder sur plusieurs pages -->

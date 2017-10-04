@@ -1,7 +1,19 @@
 <?php
     session_start();
+    /*if(isset($_SESSION["id"])){
+		if($_SESSION['ip'] != $_SERVER['REMOTE_ADDR']){
+			header("location: include/deconnexion.php");
+		}else{
+			$id = $_SESSION["mail"];
+			$admin= $_SESSION["admin"];
+		}
+	}*/
+	
     require("dbcrud.php"); // lien d'un fichier php contenant la classe, require = obligatoire, include = facultatif
     $crudite = new crud();
+		$crudite->verifadmin($_SESSION["mail"]);
+	
+		$crudite->clearnoactif();
 
         if(isset($_POST["action"]) && $_POST["action"] == "update") { // On vérifie que le bouton uptade est pressé.
            $crudite->update(); // si le bouton est pressé, la fonction update de la classe crud est utilisé.
